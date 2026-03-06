@@ -1,5 +1,5 @@
-## Student Name:
-## Student ID:
+## Student Name: Shrey Grover
+## Student ID: 219579143
 
 """
 Task B: Event Registration with Waitlist (Stub)
