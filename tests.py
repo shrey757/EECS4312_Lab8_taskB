@@ -84,3 +84,46 @@ def test_capacity_zero_all_waitlisted_and_promotion_never_happens():
 #################################################################################
 # Add your own additional tests here to cover more cases and edge cases as needed.
 #################################################################################
+
+def test_status_returns_none_for_unknown_user():
+    er = EventRegistration(capacity=2)
+    assert er.status("unknown") == UserStatus("none")
+
+
+def test_cancel_unknown_user_raises_notfound():
+    er = EventRegistration(capacity=2)
+    er.register("u1")
+
+    with pytest.raises(NotFound):
+        er.cancel("u999")
+
+def test_reregister_after_cancel_is_allowed():
+    er = EventRegistration(capacity=1)
+
+    er.register("u1")
+    er.cancel("u1")
+    result = er.register("u1")
+
+    assert result == UserStatus("registered")
+    assert er.status("u1") == UserStatus("registered")
+
+def test_multiple_cancellations_preserve_fifo_promotions():
+    er = EventRegistration(capacity=2)
+
+    er.register("u1")
+    er.register("u2")
+    er.register("u3")
+    er.register("u4")
+
+    er.cancel("u1")
+    er.cancel("u2")
+
+    snap = er.snapshot()
+    assert snap["registered"] == ["u3", "u4"]
+    assert snap["waitlist"] == []
+
+def test_empty_string_user_id_raises_value_error():
+    er = EventRegistration(capacity=1)
+
+    with pytest.raises(ValueError):
+        er.register("")
