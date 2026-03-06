@@ -1,6 +1,53 @@
-## Student Name:
-## Student ID: 
+## Student Name: Shrey Grover
+## Student ID: 219579143
 
-Prompt #1: {}
-Response #1: {}
---------------------------------------------------
+Prompt 1
+Purpose: Clarify the problem and produce a complete specification before writing code.
+
+Prompt:
+I need to implement an Event Registration with Waitlist system in Python. The system manages one event with a fixed capacity. It should register users until full, place additional users into a FIFO waitlist, automatically promote the earliest waitlisted user when a registered user cancels, prevent duplicate registrations, and allow users to query their status. Please help me identify the objective, inputs, outputs, functional requirements, constraints, invariants, negative requirements, tie-breaking rules, exceptions, acceptance criteria, edge cases, and a traceability structure before generating code.
+
+Response Summary:
+The assistant helped define the objective of the system, inputs such as capacity, user ID, and operation type, and outputs such as updated registration state and user status. It also produced functional requirements, constraints, invariants, negative requirements, tie-breaking rules based on FIFO and deterministic behavior, exceptions like capacity = 0, acceptance criteria, edge cases, and a traceability mapping between constraints, acceptance criteria, and tests.
+
+Decision:
+Accepted. The generated specification was used to complete the pre-lab questionnaire and guide implementation.
+
+
+Prompt 2
+Purpose: Generate the main implementation for solution.py.
+
+Prompt:
+Using the finalized specification, write Python code for solution.py. The implementation should define the required exceptions, a UserStatus dataclass, and an EventRegistration class. The class should support initialization with capacity, user registration, cancellation, status query, and a snapshot helper. It must enforce fixed capacity, FIFO waitlist behavior, automatic promotion on cancellation, duplicate prevention, deterministic behavior, and correct handling of capacity = 0.
+
+Response Summary:
+The assistant generated a class-based Python implementation with EventRegistration, DuplicateRequest, NotFound, and UserStatus. The code validates capacity and user IDs, registers users into either the registered list or the waitlist, promotes the earliest waitlisted user on cancellation, rejects duplicates, returns status information, and provides a snapshot of the internal state.
+
+Decision:
+Accepted with a small modification. The snapshot key was adjusted to use "waitlist" so it matched the tests.
+
+
+Prompt 3
+Purpose: Generate executable tests for tests.py.
+
+Prompt:
+Write pytest tests for the Event Registration with Waitlist system. Include tests for normal behavior and edge cases. Cover registering until capacity is full, FIFO waitlist behavior, cancellation and promotion, duplicate registration attempts, cancellation from the waitlist, capacity = 0, unknown user cancellation, status queries, re-registration after cancellation, and multiple cancellations in sequence.
+
+Response Summary:
+The assistant generated a pytest test suite that checks core functionality and edge cases. The tests verify registration behavior, waitlist ordering, promotion after cancellation, duplicate prevention, waitlist cancellation, zero-capacity behavior, status results, re-registration, and deterministic multiple promotions. The suite produced 10 passing tests.
+
+Decision:
+Accepted. The tests were used in tests.py and successfully passed with pytest.
+
+
+Prompt 4
+Purpose: Verify how to run tests in the repository environment.
+
+Prompt:
+How do I run the tests in GitHub Codespaces if pytest does not discover them automatically?
+
+Response Summary:
+The assistant explained that pytest may not auto-discover tests.py because of the filename and suggested running pytest directly on the file using "pytest -q tests.py". This command was executed successfully, and all 10 tests passed.
+
+Decision:
+Accepted. The command was used exactly as suggested.
