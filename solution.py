@@ -156,7 +156,7 @@ class EventRegistration:
         return {
             "capacity": self.capacity,
             "registered": list(self._registered),
-            "waitlisted": list(self._waitlist),
+            "waitlist": list(self._waitlist),
         }
 
     def _validate_user_id(self, user_id: str) -> None:
