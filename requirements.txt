@@ -1,0 +1,155 @@
+1. Problem Understanding
+
+System purpose:
+The system manages registration for a single event with a fixed capacity. It supports direct registration until capacity is reached,
+places additional users into a FIFO waitlist, automatically promotes the earliest waitlisted user when a registered user cancels, 
+prevents duplicate registrations, and allows users to query their current status.
+
+Inputs to the system:
+- Event capacity as a non-negative integer
+- User ID as a non-empty string
+- Operation type: register, cancel, or status query
+
+Outputs produced by the system:
+- Updated registered list
+- Updated waitlist
+- User status result
+- Clear outcome for accepted, rejected, or edge-case operations
+
+Primary goal of the system:
+To provide a predictable, consistent, and persona-aware event registration system that supports both efficient use for Jane and clear, trustworthy behavior for Mo.
+
+---
+
+2. Assumptions
+
+A1: The system manages exactly one event at a time.
+A2: Capacity is fixed during execution unless explicitly changed by a future requirement.
+A3: User IDs are non-empty strings and uniquely identify users.
+A4: Operations are processed one at a time in the order received.
+A5: The waitlist must preserve FIFO ordering.
+A6: The same valid operation sequence should always produce the same result.
+A7: A user cannot exist in both registered and waitlisted states at the same time.
+A8: The system must return explicit outcomes for invalid or edge-case operations.
+
+---
+
+3. Functional Requirements
+
+FR1: The system shall accept a fixed event capacity.
+FR2: The system shall register users until capacity is reached.
+FR3: The system shall place additional users into a FIFO waitlist once capacity is full.
+FR4: The system shall automatically promote the earliest waitlisted user when a registered user cancels.
+FR5: The system shall prevent duplicate registrations.
+FR6: The system shall allow a user to cancel either a registered or waitlisted entry.
+FR7: The system shall allow a user to query their current status.
+FR8: The system shall provide clear and consistent outcomes for accepted, rejected, and edge-case operations.
+
+---
+
+4. System Constraints
+
+C1:
+Derived from persona attribute: Jane – predictable and stable ordering of system decisions
+Constraint: The system must preserve deterministic FIFO ordering in the waitlist and must produce the same promotion result for the same sequence of operations.
+
+C2:
+Derived from persona attribute: Jane – trusts the system to resolve conflicts and enforce rules automatically
+Constraint: When a registered user cancels, the system must automatically promote the earliest waitlisted user without requiring manual intervention.
+
+C3:
+Derived from persona attribute: Jane – prefers concise outputs and minimal interaction
+Constraint: The system must return concise status outputs using a small, consistent set of states and must avoid requiring extra user steps to understand the result of an operation.
+
+C4:
+Derived from persona attribute: Jane – pain point: duplicate or repeated system messages/actions
+Constraint: The system must not generate duplicate outcomes or repeated confirmations for the same registration, cancellation, or status request.
+
+C5:
+Derived from persona attribute: Jane – pain point: systems behave inconsistently in similar situations
+Constraint: The system must behave consistently across repeated or equivalent operation sequences and must not produce different internal states for the same valid inputs.
+
+C6:
+Derived from persona attribute: Mo – deterministic system behavior under ties or conflicting conditions
+Constraint: In repeated, tie, or conflicting scenarios, the system must apply one clear deterministic rule so that outcomes are predictable and reproducible.
+
+C7:
+Derived from persona attribute: Mo – explicit handling of edge cases instead of silent failure
+Constraint: The system must explicitly handle edge cases such as capacity equal to zero, cancellation of a non-existent user, repeated cancellations, and waitlist cancellation before promotion, and must return a clear outcome instead of silently failing.
+
+C8:
+Derived from persona attribute: Mo – need for understandable explanations of system decisions
+Constraint: The system must provide an explicit, understandable explanation when an action is rejected, when a cancellation changes the state, or when a waitlisted user is promoted.
+
+---
+
+5. Acceptance Criteria
+
+AC1:
+Given an event with capacity 2 and registered users u1 and u2, and waitlisted users u3 and u4 in that order,
+When u1 cancels,
+Then u3 shall be promoted before u4 and the remaining waitlist order shall be preserved.
+
+AC2:
+Given an event with capacity 1 and registered user u1 and waitlisted user u2,
+When u1 cancels,
+Then the system shall automatically promote u2 without requiring additional user action.
+
+AC3:
+Given a user u1 who is registered,
+When the status of u1 is queried,
+Then the system shall return a concise status indicating registered.
+
+AC4:
+Given a user u1 who is already registered,
+When u1 attempts to register again,
+Then the system shall reject the duplicate request and return only one clear outcome.
+
+AC5:
+Given two identical valid operation sequences from the same initial state,
+When both sequences are executed independently,
+Then the system shall produce the same final registered list, the same waitlist order, and the same status results in both runs.
+
+AC6:
+Given an event with capacity 0,
+When user u1 registers,
+Then u1 shall not be added to the registered list, shall be placed on the waitlist, and the system shall return a clear outcome.
+
+AC7:
+Given a user u9 who is not in the system,
+When a cancellation is requested for u9,
+Then the system shall return an explicit outcome indicating that the user was not found.
+
+AC8:
+Given registered users u1 and u2 and waitlisted users u3 and u4,
+When u1 and u2 cancel in sequence,
+Then u3 and u4 shall be promoted in FIFO order and the resulting system state shall be deterministic.
+
+AC9:
+Given a registered user cancels while another user is on the waitlist,
+When the system promotes the waitlisted user,
+Then the system shall return an explicit explanation that the cancellation created an opening and that the earliest waitlisted user was promoted.
+
+---
+
+6. Edge Cases
+
+EC1:
+Expected system behavior: If capacity is 0, all registration attempts must go directly to the waitlist and the system must return a clear outcome.
+
+EC2:
+Expected system behavior: If a cancellation is requested for a user not found in the system, the system must return an explicit not-found outcome instead of failing silently.
+
+EC3:
+Expected system behavior: If a registered user cancels while multiple users are on the waitlist, the system must promote the earliest waitlisted user and preserve FIFO order.
+
+EC4:
+Expected system behavior: If multiple cancellations occur in sequence, the system must promote users in deterministic FIFO order after each cancellation.
+
+EC5:
+Expected system behavior: If a user attempts to register twice, the system must reject the duplicate request with one clear outcome only.
+
+EC6:
+Expected system behavior: If a waitlisted user cancels before promotion, the system must remove that user without disturbing the order of the remaining waitlist.
+
+
