@@ -1,0 +1,167 @@
+Constraint Prompt 1:
+I am working on Lab 9 for an Event Registration with Waitlist system. I am still at the persona interpretation stage and do NOT want code. Please help me understand the two personas and extract the main user characteristics that could affect system behavior.
+
+Persona 1: Jane Adams (Primary User)
+- Busy professional managing routines and commitments
+- Relies on automation to reduce cognitive load
+- Acts quickly and rarely revisits system suggestions
+- Trusts the system to resolve conflicts automatically
+- Prefers concise outputs and minimal interaction
+- Needs predictable and stable ordering of system decisions
+- Needs automatic handling of conflicts
+- Needs limited notification or information overload
+- Pain points: too many notifications, inconsistent behavior, manual conflict resolution
+
+Persona 2: Mo Rodriguez (Edge User)
+- User with accessibility needs and sensitivity to uncertainty
+- Carefully reviews outputs and seeks explanations
+- Performs frequent updates such as cancellations
+- Experiences stress when outcomes appear arbitrary
+- Needs deterministic behavior under ties/conflicts
+- Needs clear explanations when promotions or rejections occur
+- Needs explicit handling of edge cases instead of silent failure
+- Pain points: not understanding why the system changed, silent failures, inconsistent responses
+
+Please do the following:
+1. Summarize the key characteristics of each persona.
+2. Identify which persona attributes are most likely to affect system behavior.
+3. Do not generate code.
+
+Response summary:
+The LLM summarized Jane as a user who values predictability, automation, and concise interaction, and Mo as a user who values determinism, explanations, and explicit edge-case handling. It identified ordering, automatic promotion, concise outputs, duplicate-message avoidance, deterministic behavior, and explanation support as key behavior-affecting attributes.
+
+Decision:
+Accepted. Used this response to write the Persona Interpretation section in Form 1.
+
+
+Constraint Prompt 2:
+I am deriving testable constraints for the same Event Registration with Waitlist system. Do NOT generate the final table for me. I want brainstorming help only.
+
+System summary:
+- single event
+- fixed capacity
+- users register until full
+- extra users go to a FIFO waitlist
+- cancellations promote the earliest waitlisted user
+- duplicate users must be prevented
+- users can query status
+
+Please help me brainstorm at least 8 possible persona-derived constraints across both Jane and Mo.
+For each suggested idea, give:
+- persona source
+- persona attribute
+- whether it is a behavior, need, or pain point
+- a possible testable constraint in one sentence
+
+Do not write the final answer as if it is my submission. Keep it as brainstorming notes only.
+
+Response summary:
+The LLM suggested constraints around FIFO ordering, automatic promotion, concise status outputs, avoiding duplicate confirmations, consistency across repeated scenarios, deterministic behavior under ties/conflicts, explicit handling of edge cases, and understandable explanations for rejections/promotions.
+
+Decision:
+Accepted with modification. I used the ideas as brainstorming and rewrote the final constraints myself for Form 1.
+
+
+Constraint Prompt 3:
+I have drafted the following persona-derived constraints for my system. Please review them only for clarity and testability. Do NOT rewrite my work completely and do NOT generate code.
+
+Draft constraints:
+1. The system must preserve deterministic FIFO ordering in the waitlist.
+2. The system must automatically promote the earliest waitlisted user when a registered user cancels.
+3. The system must return concise status outputs with a small consistent set of states.
+4. The system must not generate duplicate outputs or repeated confirmations for the same request.
+5. The system must behave consistently across repeated equivalent operation sequences.
+6. The system must apply one deterministic rule in repeated, tie, or conflicting scenarios.
+7. The system must explicitly handle edge cases instead of failing silently.
+8. The system must provide understandable explanations when actions are rejected or when users are promoted.
+
+Please tell me:
+1. Which ones are already testable,
+2. Which ones are too vague,
+3. What wording should be tightened,
+4. Which ones overlap too much.
+
+Response summary:
+The LLM said the FIFO, promotion, and consistency constraints were already strong, but suggested tightening vague phrases like “understandable” and “clear outcome,” and clarifying deterministic processing and explanation behavior. It also flagged some overlap between consistency and deterministic behavior.
+
+Decision:
+Accepted partially. I kept the overall set but tightened wording in the final questionnaire answers.
+
+
+Constraint Prompt 4:
+I need help creating acceptance-criterion ideas from persona-derived constraints for an Event Registration with Waitlist system. Do NOT generate code. Give only Given/When/Then style test ideas.
+
+Use these constraints:
+- deterministic FIFO waitlist ordering
+- automatic promotion after cancellation
+- concise status output
+- duplicate registration rejection
+- deterministic repeated behavior
+- explicit handling of capacity = 0
+- explicit handling of cancelling a non-existent user
+- explanation when a waitlisted user is promoted
+
+Please suggest at least 8 acceptance-criterion ideas in Given/When/Then style, keeping them specific and verifiable.
+
+Response summary:
+The LLM suggested concrete Given/When/Then ideas for FIFO promotion, automatic waitlist promotion, concise status responses, duplicate registration rejection, deterministic repeated sequences, zero-capacity behavior, non-existent-user cancellation, and explanation after promotion.
+
+Decision:
+Accepted with modification. I used these only as idea starters and rewrote the final ACs myself.
+
+
+Constraint Prompt 5:
+I need help brainstorming edge cases for the persona-derived constraints of an Event Registration with Waitlist system. Do NOT generate implementation or final submission text. Just give concise edge-case ideas.
+
+Current areas:
+- capacity = 0
+- duplicate registration
+- cancellation of non-existent user
+- multiple cancellations in sequence
+- waitlisted user cancels before promotion
+- deterministic repeated sequences
+
+Please suggest additional or refined edge cases that would especially matter for:
+- Jane’s need for predictability and low overload
+- Mo’s need for explanations and no silent failure
+
+Response summary:
+The LLM suggested edge cases such as duplicate waitlist registration, cancellation with an empty waitlist, repeated cancellation of the same user, status query for a non-existent user, order preservation after waitlist removal, and making sure rejected operations do not change state.
+
+Decision:
+Accepted partially. I used the ideas to strengthen the Edge Cases and Acceptance Criteria sections.
+
+
+Constraint Prompt 6:
+I need help evaluating whether my old Lab 8 system fully, partially, or does not support my new persona-derived constraints. Do NOT generate code.
+
+My Lab 8 system currently supports:
+- fixed capacity
+- FIFO waitlist
+- automatic promotion after cancellation
+- duplicate prevention
+- status queries
+- explicit errors for some invalid actions
+
+My persona-derived constraints are:
+1. Deterministic FIFO ordering
+2. Automatic promotion
+3. Concise status output
+4. No duplicate/repeated confirmations
+5. Consistent repeated behavior
+6. Deterministic conflict handling
+7. Explicit edge-case handling instead of silent failure
+8. Explanations for rejections and promotions
+
+For each one, tell me whether support is likely:
+- fully supported
+- partially supported
+- not supported
+
+and explain briefly why.
+
+Response summary:
+The LLM judged FIFO ordering, automatic promotion, repeated consistency, and deterministic behavior as fully supported; concise output and edge-case handling as partially supported; and explanation-oriented behavior as not fully supported.
+
+Decision:
+Accepted with modification. I used this as guidance for Task 5 support-level judgments, but finalized the ratings myself.
