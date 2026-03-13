@@ -29,6 +29,7 @@ A5: The waitlist must preserve FIFO ordering.
 A6: The same valid operation sequence should always produce the same result.
 A7: A user cannot exist in both registered and waitlisted states at the same time.
 A8: Rejected or invalid operations must return an explicit outcome and must not silently change the system state.
+A9: User ID comparison is case-sensitive and exact.
 
 ---
 
@@ -79,8 +80,11 @@ Rejected operations, including duplicate registration attempts or cancellation o
 FR14. Capacity Zero Behavior  
 If capacity equals 0, the system shall place all registration attempts on the waitlist and shall not register any users.
 
-FR15. Explanation Support  
-The system shall provide a short, understandable explanation when an action is rejected, when a cancellation changes the system state, or when a waitlisted user is promoted.
+FR15. Explanation Support
+The system shall return exactly one explanation message when an action is rejected or when a waitlisted user is promoted due to a cancellation.
+
+FR16. Empty-Waitlist Cancellation Behavior
+If a registered user cancels and the waitlist is empty, the system shall remove that user from the registered list and no promotion shall occur.
 
 ---
 
@@ -184,6 +188,20 @@ Given u1 and u2 are registered and u3, u4, and u5 are waitlisted in that order,
 When u4 cancels their waitlist entry,  
 Then the waitlist becomes u3, u5 and the relative order of remaining users is preserved.
 
+AC15 – Cancellation with Empty Waitlist
+Given u1 is registered and the waitlist is empty,
+When u1 cancels,
+Then u1 is removed from the registered list and no promotion occurs.
+
+AC16 – Waitlist Position Reporting
+Given capacity 1 with u1 registered and u2 waitlisted,
+When u2 queries status,
+Then the system returns waitlisted with position 1.
+
+AC17 – Duplicate Cancellation
+Given u1 was registered and has already been cancelled,
+When cancellation is requested for u1 again,
+Then the system returns not_found and the system state remains unchanged.
 ---
 
 ## 6. Edge Cases
