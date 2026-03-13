@@ -51,3 +51,152 @@ The assistant explained that pytest may not auto-discover tests.py because of th
 
 Decision:
 Accepted. The command was used exactly as suggested.
+
+CHATGPT LAB 9 REQUIREMENTS REVIEW – DOCUMENTATION LOG
+=====================================================
+
+User Task:
+Review and refine requirements for an Event Registration with Waitlist system for Lab 9.
+The user requested multiple iterative reviews, improvements, and final validation before implementation.
+No code generation was requested in any step.
+
+-----------------------------------------------------
+USER PROVIDED REQUIREMENTS DOCUMENT
+-----------------------------------------------------
+
+1. Problem Understanding
+------------------------
+System purpose:
+The system manages registration for a single event with a fixed capacity. It supports direct registration until capacity is reached, places additional users into a FIFO waitlist, automatically promotes the earliest waitlisted user when a registered user cancels, prevents duplicate registrations, and allows users to query their current status.
+
+Inputs:
+- Event capacity (non‑negative integer)
+- User ID (non‑empty string)
+- Operation type: register, cancel, status
+
+Outputs:
+- Updated registered list
+- Updated waitlist
+- User status result
+- Clear outcome for accepted, rejected, or edge‑case operations
+
+Primary goal:
+Provide predictable behavior for Jane and deterministic, transparent behavior for Mo.
+
+-----------------------------------------------------
+ASSUMPTIONS
+-----------------------------------------------------
+
+A1: System manages exactly one event.
+A2: Capacity is fixed during execution.
+A3: User IDs are non‑empty strings and unique identifiers.
+A4: Operations are processed sequentially in arrival order.
+A5: Waitlist preserves FIFO ordering.
+A6: Same operation sequence produces same result.
+A7: User cannot exist in both registered and waitlisted states.
+A8: Invalid operations must return explicit outcomes and not modify state.
+
+-----------------------------------------------------
+FUNCTIONAL REQUIREMENTS
+-----------------------------------------------------
+
+FR1: Accept fixed event capacity.
+FR2: Reject capacity < 0.
+FR3: Register users until capacity reached.
+FR4: When full, place users into FIFO waitlist.
+FR5: User may appear only once anywhere in system.
+FR6: Duplicate registration attempts are rejected.
+FR7: Allow cancellation for registered or waitlisted users.
+FR8: Waitlist cancellation preserves order.
+FR9: Registered cancellation triggers promotion of earliest waitlisted user.
+FR10: Allow users to query status.
+FR11: Allowed status states:
+    - registered
+    - waitlisted
+    - not_found
+FR12: Waitlisted status query returns waitlist position.
+FR13: Rejected operations must not modify state.
+FR14: If capacity = 0 all registrations go to waitlist.
+FR15: Provide explanation when rejection, promotion, or state‑changing cancellation occurs.
+
+-----------------------------------------------------
+SYSTEM CONSTRAINTS
+-----------------------------------------------------
+
+C1: Strict FIFO waitlist ordering.
+C2: Automatic promotion after registered cancellation.
+C3: Fixed set of concise status outputs.
+C4: One outcome per operation.
+C5: Deterministic state transitions.
+C6: Operations processed sequentially.
+C7: Explicit handling of edge cases.
+C8: Short explanation messages for key state changes.
+
+-----------------------------------------------------
+ACCEPTANCE CRITERIA (SUMMARY)
+-----------------------------------------------------
+
+AC1: FIFO promotion order maintained.
+AC2: Automatic promotion when cancellation occurs.
+AC3: Registered user status query returns registered.
+AC4: Duplicate registration rejected.
+AC5: Identical operation sequences produce identical states.
+AC6: Capacity = 0 places users on waitlist.
+AC7: Cancelling non‑existent user returns not_found.
+AC8: Sequential cancellations promote users in FIFO order.
+AC9: Promotion returns explanation.
+AC10: Duplicate waitlist registration rejected.
+AC11: Rejected operations preserve system state.
+AC12: Non‑existent status query returns not_found.
+AC13: Invalid capacity rejected.
+AC14: Waitlist cancellation preserves order.
+
+-----------------------------------------------------
+ASSISTANT REVIEW – KEY FEEDBACK
+-----------------------------------------------------
+
+Remaining Ambiguities:
+- Format of status response (state vs state + metadata).
+- How explanation messages are attached to results.
+- Cancellation behavior when waitlist is empty.
+- Case sensitivity of user IDs.
+- Timing of capacity initialization.
+
+Untestable Requirements Identified:
+- Terms like “clear outcome” or “easy to understand” are subjective.
+- Explanation wording such as “short and understandable” is not measurable.
+
+Suggested Improvements:
+- Define explicit response format.
+- Replace vague wording with measurable behavior.
+- Add explicit rule for cancellation when waitlist is empty.
+- Define user ID comparison rule.
+- Clarify explanation output structure.
+
+Additional Edge Cases Recommended:
+- Registered cancellation with empty waitlist.
+- Waitlisted user querying position.
+- Duplicate cancellation attempts.
+- Register after promotion.
+- Register after waitlist removal.
+
+Suggested Additional Acceptance Criteria:
+- test_waitlist_position_reported
+- test_cancel_registered_user_without_waitlist
+- test_duplicate_cancellation_returns_not_found
+
+-----------------------------------------------------
+FINAL REVIEW SUMMARY
+-----------------------------------------------------
+
+Overall assessment:
+The specification is strong, deterministic, and well‑structured. Remaining improvements are minor:
+- tighten wording for testability
+- clarify output structure
+- add a few acceptance tests
+
+After these refinements the requirements are considered implementation‑ready.
+
+-----------------------------------------------------
+END OF DOCUMENTATION
+----------------------------------------------------
