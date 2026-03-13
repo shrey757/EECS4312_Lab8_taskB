@@ -1,50 +1,17 @@
 ## Student Name: Shrey Grover
 ## Student ID: 219579143
 
-"""
-Task B: Event Registration with Waitlist (Stub)
-In this lab, you will design and implement an Event Registration with Waitlist system using an LLM assistant as your primary programming collaborator.
-You are asked to implement a Python module that manages registration for a single event with a fixed capacity.
-The system must:
-• Accept a fixed capacity.
-• Register users until capacity is reached.
-• Place additional users into a FIFO waitlist.
-• Automatically promote the earliest waitlisted user when a registered user cancels.
-• Prevent duplicate registrations.
-• Allow users to query their current status.
-
-The system must ensure that:
-• The number of registered users never exceeds capacity.
-• Waitlist ordering preserves FIFO behavior.
-• Promotions occur deterministically under identical operation sequences.
-
-The module must preserve the following invariants:
-• A user may not appear more than once in the system.
-• A user may not simultaneously exist in multiple states.
-• The system state must remain consistent after every operation.
-
-The system must correctly handle non-trivial scenarios such as:
-• Multiple cancellations in sequence.
-• Users attempting to re-register after canceling.
-• Waitlisted users canceling before promotion.
-• Capacity equal to zero.
-• Simultaneous or rapid consecutive operations.
-• Queries during state transitions.
-
-The output consists of the updated registration state and ordered lists of registered and waitlisted users after each operation.
-"""
-
 from dataclasses import dataclass
 from typing import List, Optional
 
 
 class DuplicateRequest(Exception):
-    """Raised if a user tries to register but is already registered or waitlisted."""
+    """Kept for compatibility with earlier lab versions."""
     pass
 
 
 class NotFound(Exception):
-    """Raised if a user cannot be found for cancellation (if required by handout)."""
+    """Kept for compatibility with earlier lab versions."""
     pass
 
 
@@ -54,28 +21,40 @@ class UserStatus:
     state:
       - "registered"
       - "waitlisted"
-      - "none"
-    position: 1-based waitlist position if waitlisted; otherwise None
+      - "not_found"
+    position:
+      - 1-based waitlist position if waitlisted
+      - None otherwise
     """
     state: str
     position: Optional[int] = None
 
 
+@dataclass(frozen=True)
+class OperationResult:
+    """
+    status:
+      - resulting user status after the operation
+    explanation:
+      - exactly one explanation message when required
+      - None for simple successful operations that do not require explanation
+    """
+    status: UserStatus
+    explanation: Optional[str] = None
+
+
 class EventRegistration:
     """
-    Event registration system with:
+    Persona-aware event registration system with:
     - fixed capacity
     - FIFO waitlist
-    - automatic promotion on cancellation
-    - duplicate prevention
     - deterministic behavior
+    - duplicate prevention across the whole system
+    - explicit edge-case handling
+    - short explanations for rejections and promotions
     """
 
     def __init__(self, capacity: int) -> None:
-        """
-        Args:
-            capacity: maximum number of registered users (>= 0)
-        """
         if not isinstance(capacity, int):
             raise TypeError("capacity must be an integer")
         if capacity < 0:
@@ -85,69 +64,102 @@ class EventRegistration:
         self._registered: List[str] = []
         self._waitlist: List[str] = []
 
-    def register(self, user_id: str) -> UserStatus:
+    def register(self, user_id: str) -> OperationResult:
         """
-        Register a user:
-          - if capacity available -> registered
-          - else -> waitlisted (FIFO)
+        Register a user.
 
-        Raises:
-            DuplicateRequest if user already exists (registered or waitlisted)
+        Rules:
+        - If capacity is available, register the user.
+        - Otherwise, place the user in the FIFO waitlist.
+        - If the user already exists anywhere in the system, reject the request.
         """
         self._validate_user_id(user_id)
 
-        if user_id in self._registered or user_id in self._waitlist:
-            raise DuplicateRequest(f"user '{user_id}' already exists in the system")
+        if user_id in self._registered:
+            return OperationResult(
+                status=UserStatus("registered"),
+                explanation="duplicate registration rejected: user is already registered"
+            )
+
+        if user_id in self._waitlist:
+            return OperationResult(
+                status=UserStatus("waitlisted", self._waitlist.index(user_id) + 1),
+                explanation="duplicate registration rejected: user is already waitlisted"
+            )
 
         if len(self._registered) < self.capacity:
             self._registered.append(user_id)
-            return UserStatus(state="registered", position=None)
+            return OperationResult(status=UserStatus("registered"))
 
         self._waitlist.append(user_id)
-        return UserStatus(state="waitlisted", position=len(self._waitlist))
+        return OperationResult(
+            status=UserStatus("waitlisted", len(self._waitlist))
+        )
 
-    def cancel(self, user_id: str) -> None:
+    def cancel(self, user_id: str) -> OperationResult:
         """
-        Cancel a user:
-          - if registered -> remove and promote earliest waitlisted user (if any)
-          - if waitlisted -> remove from waitlist
-          - if user not found -> raise NotFound
+        Cancel a registered or waitlisted user.
+
+        Rules:
+        - If the user is registered, remove them.
+        - If a waitlist exists and capacity allows, promote the earliest waitlisted user.
+        - If the user is waitlisted, remove them and preserve remaining order.
+        - If the user is not found, return an explicit not_found outcome.
         """
         self._validate_user_id(user_id)
 
         if user_id in self._registered:
             self._registered.remove(user_id)
 
-            if self._waitlist:
+            if self._waitlist and len(self._registered) < self.capacity:
                 promoted_user = self._waitlist.pop(0)
                 self._registered.append(promoted_user)
-            return
+                return OperationResult(
+                    status=UserStatus("not_found"),
+                    explanation=(
+                        f"registration cancelled: {promoted_user} was promoted "
+                        f"from the waitlist due to the open slot"
+                    )
+                )
+
+            return OperationResult(
+                status=UserStatus("not_found"),
+                explanation="registration cancelled: no promotion occurred"
+            )
 
         if user_id in self._waitlist:
             self._waitlist.remove(user_id)
-            return
+            return OperationResult(
+                status=UserStatus("not_found"),
+                explanation="waitlist entry cancelled"
+            )
 
-        raise NotFound(f"user '{user_id}' not found in the system")
+        return OperationResult(
+            status=UserStatus("not_found"),
+            explanation="cancellation rejected: user not found"
+        )
 
     def status(self, user_id: str) -> UserStatus:
         """
-        Return status of a user:
-          - registered
-          - waitlisted with position (1-based)
-          - none
+        Return the current user status.
+
+        States:
+        - registered
+        - waitlisted (with 1-based position)
+        - not_found
         """
         self._validate_user_id(user_id)
 
         if user_id in self._registered:
-            return UserStatus(state="registered", position=None)
+            return UserStatus("registered")
 
         if user_id in self._waitlist:
             return UserStatus(
-                state="waitlisted",
-                position=self._waitlist.index(user_id) + 1
+                "waitlisted",
+                self._waitlist.index(user_id) + 1
             )
 
-        return UserStatus(state="none", position=None)
+        return UserStatus("not_found")
 
     def snapshot(self) -> dict:
         """
@@ -160,7 +172,9 @@ class EventRegistration:
         }
 
     def _validate_user_id(self, user_id: str) -> None:
-        """Validate user identifier."""
+        """
+        User IDs are treated as exact, case-sensitive strings.
+        """
         if not isinstance(user_id, str):
             raise TypeError("user_id must be a string")
         if user_id.strip() == "":
